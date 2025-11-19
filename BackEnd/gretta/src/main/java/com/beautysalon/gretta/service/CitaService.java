@@ -5,6 +5,7 @@ import com.beautysalon.gretta.dto.cita.CitaResponse;
 import com.beautysalon.gretta.entity.*;
 import com.beautysalon.gretta.entity.enums.EstadoCita;
 import com.beautysalon.gretta.repository.*;
+import com.beautysalon.gretta.service.validation.CitaValidacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class CitaService {
     private final ClienteRepository clienteRepository;
     private final EstilistaRepository estilistaRepository;
     private final ServicioRepository servicioRepository;
+    private final CitaValidacionService validacionService;
 
     @Transactional(readOnly = true)
     public List<CitaResponse> obtenerTodas() {
@@ -78,6 +80,9 @@ public class CitaService {
         cita.setEstado(request.getEstado() != null ? request.getEstado() : EstadoCita.PENDIENTE);
         cita.setObservaciones(request.getObservaciones());
 
+        // Validar antes de guardar
+        validacionService.validarNuevaCita(cita);
+
         cita = citaRepository.save(cita);
         return convertirAResponse(cita);
     }
@@ -86,6 +91,9 @@ public class CitaService {
     public CitaResponse actualizar(Integer id, CitaRequest request) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
+
+        // Validar que se puede modificar (con al menos 2 horas de anticipación)
+        validacionService.validarModificacionCita(cita);
 
         Cliente cliente = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + request.getIdCliente()));
@@ -96,6 +104,8 @@ public class CitaService {
         Servicio servicio = servicioRepository.findById(request.getIdServicio())
                 .orElseThrow(() -> new RuntimeException("Servicio no encontrado con ID: " + request.getIdServicio()));
 
+        EstadoCita estadoAnterior = cita.getEstado();
+        
         cita.setCliente(cliente);
         cita.setEstilista(estilista);
         cita.setServicio(servicio);
@@ -105,6 +115,12 @@ public class CitaService {
         cita.setEstado(request.getEstado() != null ? request.getEstado() : cita.getEstado());
         cita.setObservaciones(request.getObservaciones());
 
+        // Validar los nuevos datos y transición de estado si cambió
+        validacionService.validarNuevaCita(cita);
+        if (request.getEstado() != null && !request.getEstado().equals(estadoAnterior)) {
+            validacionService.validarTransicionEstado(estadoAnterior, request.getEstado());
+        }
+
         cita = citaRepository.save(cita);
         return convertirAResponse(cita);
     }
@@ -113,6 +129,10 @@ public class CitaService {
     public CitaResponse cambiarEstado(Integer id, EstadoCita nuevoEstado) {
         Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada con ID: " + id));
+        
+        // Validar transición de estado
+        validacionService.validarTransicionEstado(cita.getEstado(), nuevoEstado);
+        
         cita.setEstado(nuevoEstado);
         cita = citaRepository.save(cita);
         return convertirAResponse(cita);

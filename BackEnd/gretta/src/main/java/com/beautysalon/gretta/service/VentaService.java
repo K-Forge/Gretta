@@ -6,6 +6,7 @@ import com.beautysalon.gretta.dto.venta.VentaRequest;
 import com.beautysalon.gretta.dto.venta.VentaResponse;
 import com.beautysalon.gretta.entity.*;
 import com.beautysalon.gretta.repository.*;
+import com.beautysalon.gretta.service.validation.VentaValidacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class VentaService {
     private final DetalleVentaRepository detalleVentaRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
+    private final VentaValidacionService validacionService;
 
     @Transactional(readOnly = true)
     public List<VentaResponse> obtenerTodas() {
@@ -64,6 +66,9 @@ public class VentaService {
         Cliente cliente = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + request.getIdCliente()));
 
+        // Validar que el cliente esté activo
+        validacionService.validarClienteActivo(cliente);
+
         // Crear venta
         Venta venta = new Venta();
         venta.setCliente(cliente);
@@ -75,10 +80,7 @@ public class VentaService {
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + detalleDTO.getIdProducto()));
 
             // Validar stock disponible
-            if (producto.getStock() < detalleDTO.getCantidad()) {
-                throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre() + 
-                                         ". Disponible: " + producto.getStock() + ", Solicitado: " + detalleDTO.getCantidad());
-            }
+            validacionService.validarStockDisponible(producto, detalleDTO.getCantidad());
 
             // Crear detalle de venta
             DetalleVenta detalle = new DetalleVenta();
@@ -98,6 +100,9 @@ public class VentaService {
         // Calcular total de la venta
         venta.calcularTotal();
 
+        // Validar límites de compra
+        validacionService.validarLimitesVenta(venta);
+
         // Guardar venta con sus detalles
         venta = ventaRepository.save(venta);
         return convertirAResponse(venta);
@@ -107,6 +112,9 @@ public class VentaService {
     public void anular(Integer id) {
         Venta venta = ventaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+
+        // Validar que se puede anular (no más de 30 días)
+        validacionService.validarAnulacionVenta(venta);
 
         // Devolver stock de los productos
         for (DetalleVenta detalle : venta.getDetalles()) {

@@ -23,4 +23,11 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     
     @Query("SELECT c FROM Cita c WHERE c.cliente.idCliente = :idCliente ORDER BY c.fechaCita DESC")
     List<Cita> findByClienteOrderByFechaDesc(Integer idCliente);
+    
+    // Queries para tareas programadas
+    List<Cita> findByEstadoAndFechaCitaBetween(EstadoCita estado, LocalDateTime inicio, LocalDateTime fin);
+    
+    List<Cita> findByEstadoAndFechaCitaBefore(EstadoCita estado, LocalDateTime fecha);
+    
+    long countByEstadoAndFechaCitaBetween(EstadoCita estado, LocalDateTime inicio, LocalDateTime fin);
 }

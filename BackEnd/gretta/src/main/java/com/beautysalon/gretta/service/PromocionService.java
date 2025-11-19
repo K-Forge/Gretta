@@ -4,6 +4,7 @@ import com.beautysalon.gretta.dto.promocion.PromocionRequest;
 import com.beautysalon.gretta.dto.promocion.PromocionResponse;
 import com.beautysalon.gretta.entity.Promocion;
 import com.beautysalon.gretta.repository.PromocionRepository;
+import com.beautysalon.gretta.service.validation.PromocionValidacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class PromocionService {
 
     private final PromocionRepository promocionRepository;
+    private final PromocionValidacionService validacionService;
 
     @Transactional(readOnly = true)
     public List<PromocionResponse> obtenerTodas() {
@@ -48,10 +50,6 @@ public class PromocionService {
 
     @Transactional
     public PromocionResponse crear(PromocionRequest request) {
-        if (request.getFechaFin().isBefore(request.getFechaInicio())) {
-            throw new RuntimeException("La fecha de fin debe ser posterior a la fecha de inicio");
-        }
-
         Promocion promocion = new Promocion();
         promocion.setTitulo(request.getTitulo());
         promocion.setDescripcion(request.getDescripcion());
@@ -59,6 +57,9 @@ public class PromocionService {
         promocion.setFechaInicio(request.getFechaInicio());
         promocion.setFechaFin(request.getFechaFin());
         promocion.setActivo(request.getActivo());
+
+        // Validar todos los aspectos de la promoción
+        validacionService.validarPromocion(promocion);
 
         promocion = promocionRepository.save(promocion);
         return convertirAResponse(promocion);
@@ -69,16 +70,15 @@ public class PromocionService {
         Promocion promocion = promocionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promoción no encontrada con ID: " + id));
 
-        if (request.getFechaFin().isBefore(request.getFechaInicio())) {
-            throw new RuntimeException("La fecha de fin debe ser posterior a la fecha de inicio");
-        }
-
         promocion.setTitulo(request.getTitulo());
         promocion.setDescripcion(request.getDescripcion());
         promocion.setDescuento(request.getDescuento());
         promocion.setFechaInicio(request.getFechaInicio());
         promocion.setFechaFin(request.getFechaFin());
         promocion.setActivo(request.getActivo());
+
+        // Validar todos los aspectos de la promoción actualizada
+        validacionService.validarPromocion(promocion);
 
         promocion = promocionRepository.save(promocion);
         return convertirAResponse(promocion);
