@@ -508,3 +508,14 @@ JOIN Citas ci ON cb.idCita = ci.idCita
 JOIN Cliente cl ON ci.idCliente = cl.idCliente
 JOIN ChatConversacion cc ON cc.idCliente = cl.idCliente;
 
+-- ========================================
+-- CONSULTA: Citas con servicios en promociones activas de diciembre
+-- ========================================
+SELECT c.idCliente, c.idCita, p.titulo AS tituloPromocion
+FROM Citas c
+INNER JOIN PromocionServicios ps ON c.idServicios = ps.idServicio
+INNER JOIN Promociones p ON ps.idPromocion = p.idPromocion
+WHERE MONTH(p.fechaInicio) = 12 
+   OR MONTH(p.fechaFin) = 12
+   OR (p.fechaInicio <= '2025-12-31' AND p.fechaFin >= '2025-12-01');
+

@@ -1,0 +1,95 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Gretta Beauty Salon</h1>
+      <h2>Iniciar Sesión</h2>
+      <p>Ingresa tus credenciales para acceder</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Mensaje de error -->
+      @if (errorMessage) {
+        <div class="alert alert-error">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <!-- Campo Email -->
+      <div class="form-group">
+        <label for="correo">Correo Electrónico</label>
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          placeholder="ejemplo@correo.com"
+          [class.error]="correo?.invalid && correo?.touched"
+        />
+        @if (correo?.invalid && correo?.touched) {
+          <span class="error-message">
+            @if (correo?.errors?.['required']) {
+              El correo es requerido
+            }
+            @if (correo?.errors?.['email']) {
+              Ingresa un correo válido
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="form-group" id="contrasena-group">
+        <label for="contrasena">Contraseña</label>
+        <div class="password-input">
+          <input
+            id="contrasena"
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="contrasena"
+            placeholder="••••••••"
+            [class.error]="contrasena?.invalid && contrasena?.touched"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            tabindex="-1"
+          >
+            @if (hidePassword) {
+              👁️
+            } @else {
+              👁️‍🗨️
+            }
+          </button>
+        </div>
+        @if (contrasena?.invalid && contrasena?.touched) {
+          <span class="error-message">
+            @if (contrasena?.errors?.['required']) {
+              La contraseña es requerida
+            }
+            @if (contrasena?.errors?.['minlength']) {
+              Mínimo 6 caracteres
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Botón Submit -->
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="loading"
+      >
+        @if (loading) {
+          <span class="spinner"></span>
+          Ingresando...
+        } @else {
+          Iniciar Sesión
+        }
+      </button>
+
+      <!-- Link a Registro -->
+      <div class="form-footer">
+        <p>¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+      </div>
+    </form>
+  </div>
+</div>
