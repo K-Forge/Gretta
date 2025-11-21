@@ -1,5 +1,6 @@
 package com.beautysalon.gretta.entity;
 
+import com.beautysalon.gretta.entity.converter.CanalComunicacionConverter;
 import com.beautysalon.gretta.entity.enums.CanalComunicacion;
 import com.beautysalon.gretta.entity.enums.RolUsuario;
 import com.beautysalon.gretta.entity.enums.TipoDocumento;
@@ -40,18 +41,18 @@ public class Usuario {
     private String contrasena;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipodocumento", nullable = false, columnDefinition = "tipo_documento")
+    @Column(name = "tipodocumento", nullable = false)
     private TipoDocumento tipoDocumento;
 
     @Column(name = "numerodocumento", nullable = false, unique = true, length = 50)
     private String numeroDocumento;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rol", nullable = false, columnDefinition = "rol_usuario")
+    @Column(name = "rol", nullable = false)
     private RolUsuario rol;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "canalpreferido", columnDefinition = "canal_comunicacion")
+    @Convert(converter = CanalComunicacionConverter.class)
+    @Column(name = "canalpreferido")
     private CanalComunicacion canalPreferido;
 
     @Column(name = "activo", nullable = false)

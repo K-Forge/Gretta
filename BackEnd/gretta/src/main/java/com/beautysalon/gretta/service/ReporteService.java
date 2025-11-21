@@ -33,7 +33,7 @@ public class ReporteService {
 
         return ventas.stream()
                 .map(venta -> {
-                    List<DetalleVenta> detalles = detalleVentaRepository.findByVenta(venta.getIdVenta());
+                    List<DetalleVenta> detalles = detalleVentaRepository.findByVenta_IdVenta(venta.getIdVenta());
                     
                     List<ReporteVentaResponse.DetalleVentaReporte> detallesReporte = detalles.stream()
                             .map(detalle -> ReporteVentaResponse.DetalleVentaReporte.builder()
@@ -108,7 +108,7 @@ public class ReporteService {
             LocalDateTime fechaInicio, 
             LocalDateTime fechaFin) {
         
-        List<Cita> citas = citaRepository.findByEstilistaAndFechaCitaBetween(idEstilista, fechaInicio, fechaFin);
+        List<Cita> citas = citaRepository.findByEstilista_IdEstilistaAndFechaCitaBetween(idEstilista, fechaInicio, fechaFin);
 
         return citas.stream()
                 .map(cita -> ReporteCitaResponse.builder()
@@ -133,11 +133,11 @@ public class ReporteService {
             LocalDateTime fechaInicio, 
             LocalDateTime fechaFin) {
         
-        List<Venta> ventas = ventaRepository.findByClienteAndFechaVentaBetween(idCliente, fechaInicio, fechaFin);
+        List<Venta> ventas = ventaRepository.findByCliente_IdClienteAndFechaVentaBetween(idCliente, fechaInicio, fechaFin);
 
         return ventas.stream()
                 .map(venta -> {
-                    List<DetalleVenta> detalles = detalleVentaRepository.findByVenta(venta.getIdVenta());
+                    List<DetalleVenta> detalles = detalleVentaRepository.findByVenta_IdVenta(venta.getIdVenta());
                     
                     List<ReporteVentaResponse.DetalleVentaReporte> detallesReporte = detalles.stream()
                             .map(detalle -> ReporteVentaResponse.DetalleVentaReporte.builder()
@@ -166,10 +166,11 @@ public class ReporteService {
         
         Map<String, Object> resumen = new HashMap<>();
         resumen.put("totalVentas", ventas.size());
-        resumen.put("ingresosTotales", ventaRepository.calcularTotalVentasPorPeriodo(fechaInicio, fechaFin));
-        resumen.put("promedioVenta", ventas.isEmpty() ? 0 : 
-                ventaRepository.calcularTotalVentasPorPeriodo(fechaInicio, fechaFin)
-                        .divide(java.math.BigDecimal.valueOf(ventas.size()), 2, java.math.RoundingMode.HALF_UP));
+        Double ingresosTotalesDouble = ventaRepository.calcularTotalVentasPorPeriodo(fechaInicio, fechaFin);
+        java.math.BigDecimal ingresosTotales = java.math.BigDecimal.valueOf(ingresosTotalesDouble != null ? ingresosTotalesDouble : 0.0);
+        resumen.put("ingresosTotales", ingresosTotales);
+        resumen.put("promedioVenta", ventas.isEmpty() ? java.math.BigDecimal.ZERO : 
+                ingresosTotales.divide(java.math.BigDecimal.valueOf(ventas.size()), 2, java.math.RoundingMode.HALF_UP));
         
         return resumen;
     }

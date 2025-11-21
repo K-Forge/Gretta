@@ -62,7 +62,7 @@ public class CitaValidacionService {
         }
 
         // Validar que el estilista no tenga otra cita en el mismo horario
-        List<Cita> citasEstilista = citaRepository.findByEstilistaAndFechaCitaBetween(
+        List<Cita> citasEstilista = citaRepository.findByEstilista_IdEstilistaAndFechaCitaBetween(
                 idEstilista, 
                 fechaCita.minusHours(2), 
                 fechaCita.plusHours(2)
@@ -76,7 +76,7 @@ public class CitaValidacionService {
         }
 
         // Validar que el cliente no tenga múltiples citas pendientes el mismo día
-        List<Cita> citasCliente = citaRepository.findByClienteAndFechaCitaBetween(
+        List<Cita> citasCliente = citaRepository.findByCliente_IdClienteAndFechaCitaBetween(
                 idCliente,
                 fechaCita.toLocalDate().atStartOfDay(),
                 fechaCita.toLocalDate().atTime(23, 59, 59)
@@ -169,6 +169,76 @@ public class CitaValidacionService {
         if (cita.getFechaCita().minusHours(24).isBefore(ahora)) {
             // Podría generar una penalización o registro
             System.out.println("ADVERTENCIA: Cancelación con menos de 24 horas de anticipación");
+        }
+    }
+
+    // Método sobrecargado para validar con objeto Cita completo
+    public void validarNuevaCita(Cita cita) {
+        if (cita == null) {
+            throw new RuntimeException("La cita no puede ser null");
+        }
+        validarNuevaCita(
+            cita.getCliente().getIdCliente(),
+            cita.getEstilista().getIdEstilista(),
+            cita.getFechaCita(),
+            cita.getHoraCita()
+        );
+    }
+
+    public void validarModificacionCita(Cita cita) {
+        if (cita == null) {
+            throw new RuntimeException("La cita no puede ser null");
+        }
+        
+        if (cita.getIdCita() == null) {
+            throw new RuntimeException("El ID de la cita es requerido para modificación");
+        }
+
+        // Verificar que la cita existe
+        Cita citaExistente = citaRepository.findById(cita.getIdCita())
+                .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+
+        // No se puede modificar una cita completada o cancelada
+        if (citaExistente.getEstado() == EstadoCita.COMPLETADA) {
+            throw new RuntimeException("No se puede modificar una cita completada");
+        }
+        
+        if (citaExistente.getEstado() == EstadoCita.CANCELADA) {
+            throw new RuntimeException("No se puede modificar una cita cancelada");
+        }
+
+        // Validar la nueva fecha/hora
+        validarNuevaCita(
+            cita.getCliente().getIdCliente(),
+            cita.getEstilista().getIdEstilista(),
+            cita.getFechaCita(),
+            cita.getHoraCita()
+        );
+    }
+
+    public void validarTransicionEstado(EstadoCita estadoActual, EstadoCita nuevoEstado) {
+        if (estadoActual == null || nuevoEstado == null) {
+            throw new RuntimeException("Los estados no pueden ser null");
+        }
+
+        // Validar transiciones permitidas
+        switch (estadoActual) {
+            case PENDIENTE:
+                if (nuevoEstado != EstadoCita.CONFIRMADA && nuevoEstado != EstadoCita.CANCELADA) {
+                    throw new RuntimeException("Desde PENDIENTE solo se puede pasar a CONFIRMADA o CANCELADA");
+                }
+                break;
+            case CONFIRMADA:
+                if (nuevoEstado != EstadoCita.COMPLETADA && nuevoEstado != EstadoCita.CANCELADA) {
+                    throw new RuntimeException("Desde CONFIRMADA solo se puede pasar a COMPLETADA o CANCELADA");
+                }
+                break;
+            case COMPLETADA:
+                throw new RuntimeException("No se puede cambiar el estado de una cita COMPLETADA");
+            case CANCELADA:
+                throw new RuntimeException("No se puede cambiar el estado de una cita CANCELADA");
+            default:
+                throw new RuntimeException("Estado no reconocido: " + estadoActual);
         }
     }
 }

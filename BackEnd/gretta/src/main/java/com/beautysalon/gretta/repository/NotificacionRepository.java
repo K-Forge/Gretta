@@ -19,4 +19,19 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Inte
     List<Notificacion> findByEstadoAndFechaEnvioBefore(EstadoNotificacion estado, LocalDateTime fecha);
     
     long countByEstadoAndFechaEnvioBetween(EstadoNotificacion estado, LocalDateTime inicio, LocalDateTime fin);
+    
+    // Métodos adicionales para gestión de notificaciones
+    List<Notificacion> findByUsuario_IdUsuarioOrderByFechaEnvioDesc(Integer idUsuario);
+    
+    List<Notificacion> findByUsuario_IdUsuarioAndEstado(Integer idUsuario, EstadoNotificacion estado);
+    
+    List<Notificacion> findByTipo(com.beautysalon.gretta.entity.enums.TipoNotificacion tipo);
+    
+    List<Notificacion> findByCita_IdCita(Integer idCita);
+    
+    List<Notificacion> findByPromocion_IdPromocion(Integer idPromocion);
+    
+    Long countByUsuario_IdUsuario(Integer idUsuario);
+    
+    Long countByUsuario_IdUsuarioAndEstado(Integer idUsuario, EstadoNotificacion estado);
 }

@@ -35,7 +35,7 @@ public class Notificacion {
     private Promocion promocion;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, columnDefinition = "tipo_notificacion")
+    @Column(name = "tipo", nullable = false)
     private TipoNotificacion tipo;
 
     @Column(name = "asunto", nullable = false, length = 100)
@@ -49,6 +49,6 @@ public class Notificacion {
     private LocalDateTime fechaEnvio;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "estado_notificacion")
+    @Column(name = "estado", nullable = false)
     private EstadoNotificacion estado = EstadoNotificacion.PENDIENTE;
 }

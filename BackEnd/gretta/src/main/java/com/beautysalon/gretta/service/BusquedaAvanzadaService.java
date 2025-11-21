@@ -355,7 +355,7 @@ public class BusquedaAvanzadaService {
                 .idServicio(cita.getServicio().getIdServicio())
                 .nombreServicio(cita.getServicio().getNombre())
                 .fechaCita(cita.getFechaCita())
-                .horaCita(cita.getHoraCita())
+                .horaCita(cita.getHoraCita().toString())
                 .estado(cita.getEstado())
                 .build();
     }

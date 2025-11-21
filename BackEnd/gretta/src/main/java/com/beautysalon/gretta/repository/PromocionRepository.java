@@ -15,4 +15,11 @@ public interface PromocionRepository extends JpaRepository<Promocion, Integer> {
     
     @Query("SELECT p FROM Promocion p WHERE p.activo = true AND p.fechaInicio <= :fecha AND p.fechaFin >= :fecha")
     List<Promocion> findPromocionesVigentes(LocalDateTime fecha);
+    
+    // Métodos adicionales para validaciones
+    List<Promocion> findByActivo(boolean activo);
+    
+    List<Promocion> findByActivoAndFechaInicioBeforeAndFechaFinAfter(boolean activo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    
+    Long countByActivoAndFechaInicioBeforeAndFechaFinAfter(boolean activo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 }

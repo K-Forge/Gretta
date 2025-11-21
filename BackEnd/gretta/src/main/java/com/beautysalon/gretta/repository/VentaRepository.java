@@ -21,4 +21,14 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
     
     @Query("SELECT SUM(v.total) FROM Venta v WHERE v.fechaVenta BETWEEN :fechaInicio AND :fechaFin")
     Double getTotalVentasPorPeriodo(LocalDateTime fechaInicio, LocalDateTime fechaFin);
+    
+    // Métodos adicionales para reportes y validaciones
+    List<Venta> findByFechaVentaBetween(LocalDateTime inicio, LocalDateTime fin);
+    
+    List<Venta> findByCliente_IdClienteAndFechaVentaBetween(Integer idCliente, LocalDateTime inicio, LocalDateTime fin);
+    
+    Long countByCliente_IdCliente(Integer idCliente);
+    
+    @Query("SELECT COALESCE(SUM(v.total), 0) FROM Venta v WHERE v.fechaVenta BETWEEN :inicio AND :fin")
+    Double calcularTotalVentasPorPeriodo(LocalDateTime inicio, LocalDateTime fin);
 }

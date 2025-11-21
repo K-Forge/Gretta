@@ -43,7 +43,7 @@ public class Cita {
     private LocalTime horaCita;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "canalreserva", nullable = false, columnDefinition = "canal_comunicacion")
+    @Column(name = "canalreserva", nullable = false)
     private CanalComunicacion canalReserva;
 
     @CreationTimestamp
@@ -55,7 +55,7 @@ public class Cita {
     private LocalDateTime fechaModificacion;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "estado_cita")
+    @Column(name = "estado", nullable = false)
     private EstadoCita estado = EstadoCita.PENDIENTE;
 
     @Column(name = "observaciones", columnDefinition = "TEXT")

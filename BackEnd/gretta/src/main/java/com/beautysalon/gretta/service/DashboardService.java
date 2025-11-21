@@ -151,8 +151,8 @@ public class DashboardService {
         
         return clientes.stream()
                 .map(cliente -> {
-                    Long cantidadCitas = citaRepository.countByCliente(cliente.getIdCliente());
-                    Long cantidadCompras = ventaRepository.countByCliente(cliente.getIdCliente());
+                    Long cantidadCitas = citaRepository.countByCliente_IdCliente(cliente.getIdCliente());
+                    Long cantidadCompras = ventaRepository.countByCliente_IdCliente(cliente.getIdCliente());
                     
                     return ClienteFrecuenteResponse.builder()
                             .idCliente(cliente.getIdCliente())

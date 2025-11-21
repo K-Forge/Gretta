@@ -114,7 +114,7 @@ public class VentaValidacionService {
         LocalDateTime inicioDia = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime finDia = LocalDateTime.now().toLocalDate().atTime(23, 59, 59);
 
-        List<Venta> ventasHoy = ventaRepository.findByClienteAndFechaVentaBetween(
+        List<Venta> ventasHoy = ventaRepository.findByCliente_IdClienteAndFechaVentaBetween(
                 idCliente, inicioDia, finDia);
 
         if (ventasHoy.size() >= 10) {
@@ -131,5 +131,46 @@ public class VentaValidacionService {
                     MONTO_MAXIMO
             ));
         }
+    }
+
+    public void validarClienteActivo(Cliente cliente) {
+        if (cliente == null) {
+            throw new RuntimeException("Cliente no puede ser null");
+        }
+        
+        if (!cliente.getUsuario().getActivo()) {
+            throw new RuntimeException("El cliente no está activo");
+        }
+    }
+
+    public void validarStockDisponible(Producto producto, Integer cantidad) {
+        if (producto == null) {
+            throw new RuntimeException("Producto no puede ser null");
+        }
+        
+        if (cantidad == null || cantidad <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0");
+        }
+        
+        if (producto.getStock() < cantidad) {
+            throw new RuntimeException(String.format(
+                    "Stock insuficiente para el producto '%s'. Disponible: %d, Solicitado: %d",
+                    producto.getNombre(),
+                    producto.getStock(),
+                    cantidad
+            ));
+        }
+    }
+
+    public void validarLimitesVenta(Venta venta) {
+        if (venta == null) {
+            throw new RuntimeException("Venta no puede ser null");
+        }
+        
+        // Validar límite de compras diarias
+        validarLimiteComprasDiarias(venta.getCliente().getIdCliente());
+        
+        // Validar monto máximo
+        validarMontoMaximoVenta(venta.getTotal());
     }
 }

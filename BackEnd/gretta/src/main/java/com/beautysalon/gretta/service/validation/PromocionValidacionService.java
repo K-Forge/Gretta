@@ -115,4 +115,48 @@ public class PromocionValidacionService {
             System.out.println("ADVERTENCIA: Descuento superior al 70%. Requiere aprobación especial.");
         }
     }
+
+    public void validarPromocion(Promocion promocion) {
+        if (promocion == null) {
+            throw new RuntimeException("La promoción no puede ser null");
+        }
+
+        // Validar título
+        if (promocion.getTitulo() == null || promocion.getTitulo().trim().isEmpty()) {
+            throw new RuntimeException("El título de la promoción es obligatorio");
+        }
+
+        // Validar descuento
+        if (promocion.getDescuento() == null) {
+            throw new RuntimeException("El descuento es obligatorio");
+        }
+        
+        if (promocion.getDescuento().compareTo(BigDecimal.ZERO) < 0 || 
+            promocion.getDescuento().compareTo(new BigDecimal("100")) > 0) {
+            throw new RuntimeException("El descuento debe estar entre 0% y 100%");
+        }
+
+        // Validar fechas
+        if (promocion.getFechaInicio() == null) {
+            throw new RuntimeException("La fecha de inicio es obligatoria");
+        }
+        
+        if (promocion.getFechaFin() == null) {
+            throw new RuntimeException("La fecha de fin es obligatoria");
+        }
+
+        if (promocion.getFechaFin().isBefore(promocion.getFechaInicio()) || 
+            promocion.getFechaFin().isEqual(promocion.getFechaInicio())) {
+            throw new RuntimeException("La fecha de fin debe ser posterior a la fecha de inicio");
+        }
+
+        // Validar duración
+        if (promocion.getFechaFin().isBefore(promocion.getFechaInicio().plusDays(1))) {
+            throw new RuntimeException("La promoción debe durar al menos 1 día");
+        }
+
+        if (promocion.getFechaFin().isAfter(promocion.getFechaInicio().plusMonths(6))) {
+            throw new RuntimeException("La promoción no puede durar más de 6 meses");
+        }
+    }
 }

@@ -30,4 +30,24 @@ public interface CitaRepository extends JpaRepository<Cita, Integer> {
     List<Cita> findByEstadoAndFechaCitaBefore(EstadoCita estado, LocalDateTime fecha);
     
     long countByEstadoAndFechaCitaBetween(EstadoCita estado, LocalDateTime inicio, LocalDateTime fin);
+    
+    // Métodos adicionales para reportes y dashboard
+    List<Cita> findByFechaCitaBetween(LocalDateTime inicio, LocalDateTime fin);
+    
+    List<Cita> findByFechaCitaBetweenAndEstado(LocalDateTime inicio, LocalDateTime fin, EstadoCita estado);
+    
+    List<Cita> findByEstilista_IdEstilistaAndFechaCitaBetween(Integer idEstilista, LocalDateTime inicio, LocalDateTime fin);
+    
+    @Query("SELECT e.idEstilista, e.usuario.nombre, e.usuario.apellido, COUNT(c) as total " +
+           "FROM Cita c JOIN c.estilista e " +
+           "WHERE c.estado = 'COMPLETADA' " +
+           "GROUP BY e.idEstilista, e.usuario.nombre, e.usuario.apellido " +
+           "ORDER BY total DESC")
+    List<Object[]> getEstilistasMasActivos();
+    
+    Long countByEstado(EstadoCita estado);
+    
+    Long countByCliente_IdCliente(Integer idCliente);
+    
+    List<Cita> findByCliente_IdClienteAndFechaCitaBetween(Integer idCliente, LocalDateTime inicio, LocalDateTime fin);
 }

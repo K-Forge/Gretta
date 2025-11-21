@@ -19,5 +19,5 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Inte
            "FROM DetalleVenta d " +
            "GROUP BY d.producto.idProducto, d.producto.nombre " +
            "ORDER BY total DESC")
-    List<Object[]> getProductosMasVendidos();
+    List<Object[]> findProductosMasVendidos();
 }

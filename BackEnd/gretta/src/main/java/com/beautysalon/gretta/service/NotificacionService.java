@@ -153,14 +153,14 @@ public class NotificacionService {
 
     @Transactional(readOnly = true)
     public List<NotificacionResponse> obtenerPorUsuario(Integer idUsuario) {
-        return notificacionRepository.findByUsuarioOrderByFechaDesc(idUsuario).stream()
+        return notificacionRepository.findByUsuario_IdUsuarioOrderByFechaEnvioDesc(idUsuario).stream()
                 .map(this::convertirAResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<NotificacionResponse> obtenerPorUsuarioYEstado(Integer idUsuario, EstadoNotificacion estado) {
-        return notificacionRepository.findByUsuarioAndEstado(idUsuario, estado).stream()
+        return notificacionRepository.findByUsuario_IdUsuarioAndEstado(idUsuario, estado).stream()
                 .map(this::convertirAResponse)
                 .collect(Collectors.toList());
     }
@@ -181,14 +181,14 @@ public class NotificacionService {
 
     @Transactional(readOnly = true)
     public List<NotificacionResponse> obtenerPorCita(Integer idCita) {
-        return notificacionRepository.findByCita(idCita).stream()
+        return notificacionRepository.findByCita_IdCita(idCita).stream()
                 .map(this::convertirAResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<NotificacionResponse> obtenerPorPromocion(Integer idPromocion) {
-        return notificacionRepository.findByPromocion(idPromocion).stream()
+        return notificacionRepository.findByPromocion_IdPromocion(idPromocion).stream()
                 .map(this::convertirAResponse)
                 .collect(Collectors.toList());
     }
@@ -240,12 +240,12 @@ public class NotificacionService {
 
     @Transactional(readOnly = true)
     public Long contarPorUsuario(Integer idUsuario) {
-        return notificacionRepository.countByUsuario(idUsuario);
+        return notificacionRepository.countByUsuario_IdUsuario(idUsuario);
     }
 
     @Transactional(readOnly = true)
     public Long contarPorUsuarioYEstado(Integer idUsuario, EstadoNotificacion estado) {
-        return notificacionRepository.countByUsuarioAndEstado(idUsuario, estado);
+        return notificacionRepository.countByUsuario_IdUsuarioAndEstado(idUsuario, estado);
     }
 
     private NotificacionResponse convertirAResponse(Notificacion notificacion) {

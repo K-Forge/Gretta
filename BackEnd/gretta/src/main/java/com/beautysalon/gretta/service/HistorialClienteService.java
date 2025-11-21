@@ -1,5 +1,4 @@
 package com.beautysalon.gretta.service;
-
 import com.beautysalon.gretta.dto.historial.EstadisticasClienteResponse;
 import com.beautysalon.gretta.dto.historial.HistorialClienteRequest;
 import com.beautysalon.gretta.dto.historial.HistorialClienteResponse;

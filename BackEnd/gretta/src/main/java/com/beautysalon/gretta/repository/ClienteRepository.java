@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
     
     Optional<Cliente> findByUsuario_IdUsuario(Integer idUsuario);
+    
+    Optional<Cliente> findByUsuario(com.beautysalon.gretta.entity.Usuario usuario);
 }

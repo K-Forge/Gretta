@@ -1,0 +1,98 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <h1>Mi Perfil</h1>
+    
+    <!-- Información del usuario -->
+    @if (currentUser) {
+      <div class="user-info">
+        <div class="avatar">{{ currentUser.nombre.charAt(0) }}{{ currentUser.apellido.charAt(0) }}</div>
+        <div>
+          <h2>{{ currentUser.nombre }} {{ currentUser.apellido }}</h2>
+          <p>{{ currentUser.correo }}</p>
+          <span class="badge">{{ currentUser.rol }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button 
+        [class.active]="activeTab === 'perfil'" 
+        (click)="setActiveTab('perfil')"
+      >
+        Datos Personales
+      </button>
+      <button 
+        [class.active]="activeTab === 'password'" 
+        (click)="setActiveTab('password')"
+      >
+        Cambiar Contraseña
+      </button>
+    </div>
+
+    <!-- Mensajes -->
+    @if (successMessage) {
+      <div class="alert alert-success">{{ successMessage }}</div>
+    }
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <!-- Formulario de Perfil -->
+    @if (activeTab === 'perfil') {
+      <form [formGroup]="perfilForm" (ngSubmit)="onSubmitPerfil()">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" formControlName="nombre" />
+        </div>
+
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" formControlName="apellido" />
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" formControlName="telefono" />
+        </div>
+
+        <div class="form-group">
+          <label>Canal Preferido</label>
+          <select formControlName="canalPreferido">
+            <option value="EMAIL">Email</option>
+            <option value="WHATSAPP">WhatsApp</option>
+            <option value="SMS">SMS</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+      </form>
+    }
+
+    <!-- Formulario de Contraseña -->
+    @if (activeTab === 'password') {
+      <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+        <div class="form-group">
+          <label>Contraseña Actual</label>
+          <input type="password" formControlName="contrasenaActual" />
+        </div>
+
+        <div class="form-group">
+          <label>Nueva Contraseña</label>
+          <input type="password" formControlName="nuevaContrasena" />
+        </div>
+
+        <div class="form-group">
+          <label>Confirmar Nueva Contraseña</label>
+          <input type="password" formControlName="confirmarContrasena" />
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Cambiando...' : 'Cambiar Contraseña' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>

@@ -63,14 +63,15 @@ public class TareasProgramadas {
                         cita.getServicio().getNombre()
                 );
 
-                NotificacionRequest request = new NotificacionRequest();
-                request.setIdUsuario(cita.getCliente().getUsuario().getIdUsuario());
-                request.setTipo(TipoNotificacion.RECORDATORIO);
-                request.setTitulo("Recordatorio de Cita");
-                request.setMensaje(mensaje);
-                request.setCanal(cita.getCliente().getUsuario().getCanalPreferido());
+                NotificacionRequest request = NotificacionRequest.builder()
+                        .idUsuario(cita.getCliente().getUsuario().getIdUsuario())
+                        .idCita(cita.getIdCita())
+                        .tipo(TipoNotificacion.RECORDATORIO)
+                        .asunto("Recordatorio de Cita")
+                        .mensaje(mensaje)
+                        .build();
 
-                notificacionService.crear(request);
+                notificacionService.crearNotificacion(request);
                 recordatoriosEnviados++;
 
             } catch (Exception e) {

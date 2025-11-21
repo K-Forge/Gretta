@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface EstilistaRepository extends JpaRepository<Estilista, Integer> {
     
     Optional<Estilista> findByUsuario_IdUsuario(Integer idUsuario);
+    
+    Optional<Estilista> findByUsuario(com.beautysalon.gretta.entity.Usuario usuario);
 }

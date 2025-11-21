@@ -114,7 +114,7 @@ public class VentaService {
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
 
         // Validar que se puede anular (no más de 30 días)
-        validacionService.validarAnulacionVenta(venta);
+        validacionService.validarAnulacionVenta(id);
 
         // Devolver stock de los productos
         for (DetalleVenta detalle : venta.getDetalles()) {
@@ -129,7 +129,7 @@ public class VentaService {
 
     @Transactional(readOnly = true)
     public List<Object[]> obtenerProductosMasVendidos() {
-        return detalleVentaRepository.getProductosMasVendidos();
+        return detalleVentaRepository.findProductosMasVendidos();
     }
 
     private VentaResponse convertirAResponse(Venta venta) {
