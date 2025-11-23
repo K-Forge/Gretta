@@ -1,22 +1,19 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
-
+import { catchError } from 'rxjs/operators'; 
+import { throwError } from 'rxjs';
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
-  // Add authorization token if available
-  const token = localStorage.getItem('authToken');
+
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('authToken') : null;
   
-  if (token) {
+  if (token && token.trim() !== '') {
     req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
     });
   }
-
   return next(req).pipe(
     catchError((error) => {
-      // Handle HTTP errors globally
       console.error('HTTP Error:', error);
       return throwError(() => error);
     })
