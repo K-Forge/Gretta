@@ -1,6 +1,5 @@
 package com.beautysalon.gretta.entity;
 
-import com.beautysalon.gretta.entity.converter.CanalComunicacionConverter;
 import com.beautysalon.gretta.entity.enums.CanalComunicacion;
 import com.beautysalon.gretta.entity.enums.RolUsuario;
 import com.beautysalon.gretta.entity.enums.TipoDocumento;
@@ -51,7 +50,7 @@ public class Usuario {
     @Column(name = "rol", nullable = false)
     private RolUsuario rol;
 
-    @Convert(converter = CanalComunicacionConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "canalpreferido")
     private CanalComunicacion canalPreferido;
 

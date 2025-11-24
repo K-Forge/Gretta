@@ -3,37 +3,23 @@ package com.beautysalon.gretta.entity.converter;
 import com.beautysalon.gretta.entity.enums.CanalComunicacion;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import org.postgresql.util.PGobject;
 
-import java.sql.SQLException;
-
-@Converter(autoApply = false)
-public class CanalComunicacionConverter implements AttributeConverter<CanalComunicacion, Object> {
+@Converter(autoApply = true)
+public class CanalComunicacionConverter implements AttributeConverter<CanalComunicacion, String> {
 
     @Override
-    public Object convertToDatabaseColumn(CanalComunicacion attribute) {
+    public String convertToDatabaseColumn(CanalComunicacion attribute) {
         if (attribute == null) {
             return null;
         }
-        try {
-            PGobject pgObject = new PGobject();
-            pgObject.setType("canal_comunicacion");
-            pgObject.setValue(attribute.name());
-            return pgObject;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error converting enum to PostgreSQL type", e);
-        }
+        return attribute.name();
     }
 
     @Override
-    public CanalComunicacion convertToEntityAttribute(Object dbData) {
-        if (dbData == null) {
+    public CanalComunicacion convertToEntityAttribute(String dbData) {
+        if (dbData == null || dbData.isEmpty()) {
             return null;
         }
-        String value = dbData.toString();
-        if (value.isEmpty()) {
-            return null;
-        }
-        return CanalComunicacion.valueOf(value);
+        return CanalComunicacion.valueOf(dbData);
     }
 }
