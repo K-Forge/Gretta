@@ -71,10 +71,10 @@ INSERT INTO Usuarios (nombre, apellido, correo, telefono, contrasena, tipoDocume
 ('Lucía', 'Sierra', 'lucias@example.com', '3001111170', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOcd7.odEqJ62', 'CEDULA', '1001111170', 'ESTILISTA', 'WHATSAPP');
 
 -- ====================
--- 2. Cliente (8 registros - sin duplicados, SERIAL auto-genera IDs)
+-- 2. Cliente (10 registros - sin duplicados, SERIAL auto-genera IDs)
 -- ====================
 INSERT INTO Cliente (idUsuario) VALUES
-(1), (2), (4), (6), (7), (9), (10), (4);
+(1), (2), (4), (6), (7), (9), (10), (11), (12), (13);
 
 -- ====================
 -- 3. Estilista (10 registros - SERIAL auto-genera IDs)
@@ -117,7 +117,7 @@ INSERT INTO Promociones (titulo, descripcion, descuento, fechaInicio, fechaFin) 
 ('Jojojo Navidad con color', 'Tintura y retoque con 15% de descuento', 15.00, '2025-12-01', '2025-12-28'),
 ('Diciembre Relajado', 'Uñas con diseños de arbolitos, con un 20% de descuento', 20.00, '2025-04-05', '2025-04-25'),
 ('Mayo para Mamá', 'Descuento especial en manicura y pedicura', 40.00, '2025-05-01', '2025-05-31'),
-('Junio Premiado', 'El día 15 de Junio, descuentos de 35%', 35.00, '2025-06-15', '2025-06-15'),
+('Junio Premiado', 'El día 15 de Junio, descuentos de 35%', 35.00, '2025-06-15', '2025-06-16'),
 ('Julio Refrescante', 'Si tienes facturas electrónicas de 10 servicios o más en los últimos 2 meses, 20% de descuento', 20.00, '2025-07-01', '2025-07-20'),
 ('Agosto Estilizado', 'Peinados con secado express gratis', 10.00, '2025-08-05', '2025-08-31'),
 ('Septiembre Rosa', 'Apoyo a la campaña contra el cáncer de mama', 15.00, '2025-09-01', '2025-09-30'),
