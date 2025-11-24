@@ -109,7 +109,11 @@ export class AuthService {
    * Obtener token JWT
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    if (!token || token === 'null' || token === 'undefined') {
+      return null;
+    }
+    return token;
   }
 
   /**
@@ -182,7 +186,7 @@ export class AuthService {
    */
   private getUserFromStorage(): Usuario | null {
     const userJson = localStorage.getItem(this.USER_KEY);
-    if (userJson) {
+    if (userJson && userJson !== 'null' && userJson !== 'undefined') {
       try {
         return JSON.parse(userJson);
       } catch (error) {

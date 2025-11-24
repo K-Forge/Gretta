@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.security.authentication.BadCredentialsException;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -22,30 +24,20 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            LoginResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Credenciales inválidas");
-            error.put("detalle", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-        }
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        System.out.println("Login attempt for: " + request.getCorreo());
+        LoginResponse response = authService.login(request);
+        System.out.println("Login successful for: " + request.getCorreo());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        try {
-            String mensaje = authService.register(request);
-            Map<String, String> response = new HashMap<>();
-            response.put("mensaje", mensaje);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("mensaje", "Error al registrar usuario");
-            error.put("detalle", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-        }
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
+        System.out.println("Register attempt for: " + request.getCorreo());
+        String mensaje = authService.register(request);
+        System.out.println("Register successful for: " + request.getCorreo());
+        Map<String, String> response = new HashMap<>();
+        response.put("mensaje", mensaje);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -1,0 +1,421 @@
+// Variables Marinas
+$primary-blue: #005f73;
+$secondary-teal: #0a9396;
+$light-blue: #e0fbfc;
+$sand: #ee9b00;
+$coral: #ae2012;
+$white: #ffffff;
+$dark-navy: #001219;
+$gray-light: #f8f9fa;
+$gray-border: #dee2e6;
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: $gray-light;
+}
+
+// Sidebar
+.sidebar {
+  width: 260px;
+  background-color: $primary-blue;
+  color: $white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+
+  .sidebar-header {
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    p {
+      margin: 0.5rem 0 0;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: 1rem 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1rem;
+
+        i {
+          width: 20px;
+          text-align: center;
+        }
+
+        &:hover {
+          background-color: rgba(255,255,255,0.1);
+          padding-left: 2.5rem;
+        }
+
+        &.active {
+          background-color: $secondary-teal;
+          border-left: 4px solid $sand;
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+
+    .logout-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: $white;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      &:hover {
+        background-color: $coral;
+        border-color: $coral;
+      }
+    }
+  }
+}
+
+// Main Content
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+
+  .top-bar {
+    background-color: $white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: $primary-blue;
+      text-transform: capitalize;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: $dark-navy;
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        background-color: $secondary-teal;
+        color: $white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .content-area {
+    padding: 2rem;
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+// Dashboard Cards (Resumen)
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+
+  .card {
+    background: $white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-left: 5px solid $secondary-teal;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+
+    h3 {
+      margin: 0;
+      color: $primary-blue;
+      font-size: 1.1rem;
+    }
+
+    .number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: $dark-navy;
+      margin: 1rem 0 0;
+    }
+  }
+}
+
+// CRUD Styles
+.crud-container {
+  background: $white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+  .crud-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .btn-add {
+      background-color: $secondary-teal;
+      color: $white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+
+      &:hover {
+        background-color: darken($secondary-teal, 10%);
+      }
+    }
+
+    .search-box {
+      position: relative;
+      
+      input {
+        padding: 0.8rem 1rem 0.8rem 2.5rem;
+        border: 1px solid $gray-border;
+        border-radius: 5px;
+        width: 250px;
+        
+        &:focus {
+          outline: none;
+          border-color: $secondary-teal;
+        }
+      }
+
+      i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+      }
+    }
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .crud-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid $gray-border;
+    }
+
+    th {
+      background-color: $light-blue;
+      color: $primary-blue;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: rgba($light-blue, 0.3);
+    }
+
+    .badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+
+      &.active {
+        background-color: rgba($secondary-teal, 0.1);
+        color: $secondary-teal;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &.edit {
+          background-color: rgba($sand, 0.1);
+          color: $sand;
+          &:hover { background-color: $sand; color: $white; }
+        }
+
+        &.delete {
+          background-color: rgba($coral, 0.1);
+          color: $coral;
+          &:hover { background-color: $coral; color: $white; }
+        }
+      }
+    }
+  }
+}
+
+// Modal Styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: $white;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid $gray-border;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      color: $primary-blue;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #999;
+      &:hover { color: $coral; }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+
+    .form-group {
+      margin-bottom: 1rem;
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: $dark-navy;
+        font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid $gray-border;
+        border-radius: 5px;
+        font-size: 1rem;
+        
+        &:focus {
+          outline: none;
+          border-color: $secondary-teal;
+        }
+      }
+    }
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid $gray-border;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    button {
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      border: none;
+    }
+
+    .btn-cancel {
+      background-color: $gray-light;
+      color: $dark-navy;
+      &:hover { background-color: darken($gray-light, 10%); }
+    }
+
+    .btn-save {
+      background-color: $secondary-teal;
+      color: $white;
+      &:hover { background-color: darken($secondary-teal, 10%); }
+    }
+  }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

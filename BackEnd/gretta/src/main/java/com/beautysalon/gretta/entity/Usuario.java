@@ -14,6 +14,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "usuarios")
 @Data
@@ -39,6 +41,7 @@ public class Usuario {
     private String telefono;
 
     @Column(name = "contrasena", nullable = false, length = 255)
+    @JsonIgnore
     private String contrasena;
 
     @Enumerated(EnumType.STRING)
@@ -77,8 +80,10 @@ public class Usuario {
     private Integer modificadoPor;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("usuario")
     private Cliente cliente;
 
     @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("usuario")
     private Estilista estilista;
 }

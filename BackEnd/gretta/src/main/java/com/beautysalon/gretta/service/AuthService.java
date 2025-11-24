@@ -19,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.beautysalon.gretta.security.CustomUserDetails;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -32,30 +34,31 @@ public class AuthService {
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
+        String correo = request.getCorreo().toLowerCase();
+        
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getCorreo(), request.getContrasena())
+                new UsernamePasswordAuthenticationToken(correo, request.getContrasena())
         );
 
-        Usuario usuario = usuarioRepository.findByCorreo(request.getCorreo())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // Obtener el usuario directamente del principal autenticado
+        // Esto evita una segunda consulta a la base de datos
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Usuario usuario = userDetails.getUsuario();
 
         String token = jwtUtil.generateToken(usuario.getCorreo());
 
         return LoginResponse.builder()
                 .token(token)
                 .tipo("Bearer")
-                .idUsuario(usuario.getIdUsuario())
-                .nombre(usuario.getNombre())
-                .apellido(usuario.getApellido())
-                .correo(usuario.getCorreo())
-                .rol(usuario.getRol())
+                .usuario(usuario)
                 .build();
     }
 
     @Transactional
     public String register(RegisterRequest request) {
+        String correo = request.getCorreo().toLowerCase();
         // Validar que el correo no esté registrado
-        if (usuarioRepository.existsByCorreo(request.getCorreo())) {
+        if (usuarioRepository.existsByCorreo(correo)) {
             throw new RuntimeException("El correo ya está registrado");
         }
 
@@ -68,7 +71,7 @@ public class AuthService {
         Usuario usuario = new Usuario();
         usuario.setNombre(request.getNombre());
         usuario.setApellido(request.getApellido());
-        usuario.setCorreo(request.getCorreo());
+        usuario.setCorreo(correo);
         usuario.setTelefono(request.getTelefono());
         usuario.setContrasena(passwordEncoder.encode(request.getContrasena()));
         usuario.setTipoDocumento(request.getTipoDocumento());

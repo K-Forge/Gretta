@@ -13,10 +13,7 @@ import lombok.NoArgsConstructor;
 public class LoginResponse {
 
     private String token;
+    @Builder.Default
     private String tipo = "Bearer";
-    private Integer idUsuario;
-    private String nombre;
-    private String apellido;
-    private String correo;
-    private RolUsuario rol;
+    private com.beautysalon.gretta.entity.Usuario usuario;
 }

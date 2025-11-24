@@ -53,8 +53,12 @@ export class LoginComponent {
       },
       error: (error) => {
         this.loading = false;
-        this.errorMessage = error.error?.message || 'Credenciales inválidas. Por favor, intenta de nuevo.';
-        console.error('Error de login:', error);
+        console.error('Error de login completo:', error);
+        
+        // Intentar obtener el mensaje de error de diferentes estructuras posibles
+        const backendMessage = error.error?.mensaje || error.error?.message || error.error?.detalle;
+        
+        this.errorMessage = backendMessage || 'Credenciales inválidas. Por favor, intenta de nuevo.';
       }
     });
   }
