@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -35,6 +37,7 @@ public class Notificacion {
     private Promocion promocion;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "tipo", nullable = false)
     private TipoNotificacion tipo;
 
@@ -49,6 +52,7 @@ public class Notificacion {
     private LocalDateTime fechaEnvio;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "estado", nullable = false)
     private EstadoNotificacion estado = EstadoNotificacion.PENDIENTE;
 }
