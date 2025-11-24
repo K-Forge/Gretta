@@ -6,7 +6,7 @@ CONFIGURACIÓN BASE DE DATOS
 Antes de iniciar, edita el archivo:
 BackEnd/gretta/src/main/resources/application.properties
 
-Comenta o descomenta la sección correspondiente a tu usuario de base de datos (ej. BRIAN, LINA, o con MAYUSCULAS.) o añade tu propia configuración.
+Comenta o descomenta la sección correspondiente a tu usuario de base de datos.
 
 
 POSTGRESQL (Windows)
@@ -25,17 +25,21 @@ cd ..          : Regresar a la carpeta anterior
 ls             : Listar archivos en la carpeta actual (en Windows usar 'dir')
 
 
-BACKEND
--------
-cd BackEnd/gretta && ./mvnw spring-boot:run
+--- BACKEND ---
+1. Navegar a la carpeta del backend:
+   cd BackEnd/gretta
+
+2. Iniciar la aplicación Spring Boot:
+   mvn spring-boot:run
 
 
 FRONTEND
---------
-cd FrontEnd
+--- FRONTEND ---
+1. Navegar a la carpeta del frontend:
+   cd FrontEnd
 
-# Solo la primera vez:
-npm install
+2. Instalar dependencias (si es la primera vez):
+   npm install
 
-# Para iniciar:
-npm start
+3. Iniciar el servidor de desarrollo:
+    npm start
