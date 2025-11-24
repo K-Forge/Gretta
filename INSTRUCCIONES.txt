@@ -42,4 +42,4 @@ FRONTEND
    npm install
 
 3. Iniciar el servidor de desarrollo:
-    npm start
+   npm start
