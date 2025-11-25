@@ -109,6 +109,62 @@ public class VentaService {
     }
 
     @Transactional
+    public VentaResponse actualizar(Integer id, VentaRequest request) {
+        Venta venta = ventaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));
+
+        // 1. Devolver stock de los productos actuales
+        for (DetalleVenta detalle : venta.getDetalles()) {
+            Producto producto = detalle.getProducto();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
+        }
+        
+        // 2. Limpiar detalles actuales
+        venta.getDetalles().clear();
+
+        // 3. Validar y asignar nuevo cliente
+        Cliente cliente = clienteRepository.findById(request.getIdCliente())
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + request.getIdCliente()));
+        
+        validacionService.validarClienteActivo(cliente);
+        venta.setCliente(cliente);
+
+        // 4. Procesar nuevos detalles
+        for (DetalleVentaDTO detalleDTO : request.getDetalles()) {
+            Producto producto = productoRepository.findById(detalleDTO.getIdProducto())
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + detalleDTO.getIdProducto()));
+
+            // Validar stock disponible
+            validacionService.validarStockDisponible(producto, detalleDTO.getCantidad());
+
+            // Crear detalle de venta
+            DetalleVenta detalle = new DetalleVenta();
+            detalle.setProducto(producto);
+            detalle.setCantidad(detalleDTO.getCantidad());
+            detalle.setPrecioUnitario(producto.getPrecio());
+            detalle.calcularSubtotal();
+
+            // Actualizar stock del producto
+            producto.setStock(producto.getStock() - detalleDTO.getCantidad());
+            productoRepository.save(producto);
+
+            // Agregar detalle a la venta
+            venta.agregarDetalle(detalle);
+        }
+
+        // 5. Recalcular total
+        venta.calcularTotal();
+
+        // 6. Validar límites de compra
+        validacionService.validarLimitesVenta(venta);
+
+        // 7. Guardar venta
+        venta = ventaRepository.save(venta);
+        return convertirAResponse(venta);
+    }
+
+    @Transactional
     public void anular(Integer id) {
         Venta venta = ventaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Venta no encontrada con ID: " + id));

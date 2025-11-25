@@ -28,7 +28,7 @@ public class CitaValidacionService {
     private static final LocalTime HORA_FIN = LocalTime.of(20, 0);
 
     public void validarNuevaCita(Integer idCliente, Integer idEstilista, 
-                                  LocalDateTime fechaCita, LocalTime horaCita) {
+                                  LocalDateTime fechaCita, LocalTime horaCita, Integer idCita) {
         
         // Validar cliente existe y está activo
         Cliente cliente = clienteRepository.findById(idCliente)
@@ -57,7 +57,8 @@ public class CitaValidacionService {
         }
 
         // Validar que la fecha no sea en el pasado
-        if (fechaCita.isBefore(LocalDateTime.now())) {
+        LocalDateTime fechaHoraCita = LocalDateTime.of(fechaCita.toLocalDate(), horaCita);
+        if (fechaHoraCita.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("No se pueden agendar citas en el pasado");
         }
 
@@ -69,6 +70,9 @@ public class CitaValidacionService {
         );
 
         for (Cita cita : citasEstilista) {
+            if (idCita != null && cita.getIdCita().equals(idCita)) {
+                continue;
+            }
             if (cita.getEstado() != EstadoCita.CANCELADA && 
                 cita.getHoraCita().equals(horaCita)) {
                 throw new RuntimeException("El estilista ya tiene una cita agendada en este horario");
@@ -83,6 +87,7 @@ public class CitaValidacionService {
         );
 
         long citasPendientes = citasCliente.stream()
+                .filter(c -> idCita == null || !c.getIdCita().equals(idCita))
                 .filter(c -> c.getEstado() == EstadoCita.PENDIENTE || 
                            c.getEstado() == EstadoCita.CONFIRMADA)
                 .count();
@@ -147,7 +152,8 @@ public class CitaValidacionService {
                 cita.getCliente().getIdCliente(),
                 cita.getEstilista().getIdEstilista(),
                 nuevaFecha,
-                nuevaHora
+                nuevaHora,
+                cita.getIdCita()
             );
         }
     }
@@ -181,7 +187,8 @@ public class CitaValidacionService {
             cita.getCliente().getIdCliente(),
             cita.getEstilista().getIdEstilista(),
             cita.getFechaCita(),
-            cita.getHoraCita()
+            cita.getHoraCita(),
+            cita.getIdCita()
         );
     }
 
@@ -206,14 +213,6 @@ public class CitaValidacionService {
         if (citaExistente.getEstado() == EstadoCita.CANCELADA) {
             throw new RuntimeException("No se puede modificar una cita cancelada");
         }
-
-        // Validar la nueva fecha/hora
-        validarNuevaCita(
-            cita.getCliente().getIdCliente(),
-            cita.getEstilista().getIdEstilista(),
-            cita.getFechaCita(),
-            cita.getHoraCita()
-        );
     }
 
     public void validarTransicionEstado(EstadoCita estadoActual, EstadoCita nuevoEstado) {

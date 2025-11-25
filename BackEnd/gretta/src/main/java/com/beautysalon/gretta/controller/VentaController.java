@@ -105,6 +105,20 @@ public class VentaController {
         }
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ESTILISTA')")
+    public ResponseEntity<?> actualizar(@PathVariable Integer id, @Valid @RequestBody VentaRequest request) {
+        try {
+            VentaResponse response = ventaService.actualizar(id, request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("mensaje", "Error al actualizar venta");
+            error.put("detalle", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
     @DeleteMapping("/{id}/anular")
     @PreAuthorize("hasRole('ESTILISTA')")
     public ResponseEntity<?> anular(@PathVariable Integer id) {

@@ -16,4 +16,6 @@ public class LoginResponse {
     @Builder.Default
     private String tipo = "Bearer";
     private com.beautysalon.gretta.entity.Usuario usuario;
+    private Integer idCliente;
+    private Integer idEstilista;
 }

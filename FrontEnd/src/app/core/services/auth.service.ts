@@ -16,6 +16,8 @@ import {
 export class AuthService {
   private readonly TOKEN_KEY = 'authToken';
   private readonly USER_KEY = 'currentUser';
+  private readonly CLIENT_ID_KEY = 'clientId';
+  private readonly STYLIST_ID_KEY = 'stylistId';
 
   // Señales para manejo reactivo del estado
   private currentUserSubject = new BehaviorSubject<Usuario | null>(this.getUserFromStorage());
@@ -164,6 +166,12 @@ export class AuthService {
   private handleAuthentication(response: AuthResponse): void {
     this.setToken(response.token);
     this.setUser(response.usuario);
+    if (response.idCliente) {
+      localStorage.setItem(this.CLIENT_ID_KEY, response.idCliente.toString());
+    }
+    if (response.idEstilista) {
+      localStorage.setItem(this.STYLIST_ID_KEY, response.idEstilista.toString());
+    }
     this.currentUserSubject.next(response.usuario);
   }
 
@@ -202,6 +210,8 @@ export class AuthService {
   private clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.CLIENT_ID_KEY);
+    localStorage.removeItem(this.STYLIST_ID_KEY);
   }
 
   /**
@@ -210,5 +220,21 @@ export class AuthService {
   updateCurrentUser(user: Usuario): void {
     this.setUser(user);
     this.currentUserSubject.next(user);
+  }
+
+  /**
+   * Obtener ID del cliente actual
+   */
+  getClientId(): number | null {
+    const id = localStorage.getItem(this.CLIENT_ID_KEY);
+    return id ? parseInt(id, 10) : null;
+  }
+
+  /**
+   * Obtener ID del estilista actual
+   */
+  getStylistId(): number | null {
+    const id = localStorage.getItem(this.STYLIST_ID_KEY);
+    return id ? parseInt(id, 10) : null;
   }
 }

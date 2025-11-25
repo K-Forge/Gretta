@@ -47,10 +47,25 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(usuario.getCorreo());
 
+        Integer idCliente = null;
+        Integer idEstilista = null;
+
+        if (usuario.getRol() == RolUsuario.CLIENTE) {
+            idCliente = clienteRepository.findByUsuario(usuario)
+                    .map(Cliente::getIdCliente)
+                    .orElse(null);
+        } else if (usuario.getRol() == RolUsuario.ESTILISTA) {
+            idEstilista = estilistaRepository.findByUsuario(usuario)
+                    .map(Estilista::getIdEstilista)
+                    .orElse(null);
+        }
+
         return LoginResponse.builder()
                 .token(token)
                 .tipo("Bearer")
                 .usuario(usuario)
+                .idCliente(idCliente)
+                .idEstilista(idEstilista)
                 .build();
     }
 

@@ -89,7 +89,7 @@ public class CitaController {
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasRole('ESTILISTA')")
+    @PreAuthorize("hasAnyRole('CLIENTE', 'ESTILISTA')")
     public ResponseEntity<?> cambiarEstado(@PathVariable Integer id, @RequestParam EstadoCita estado) {
         try {
             CitaResponse response = citaService.cambiarEstado(id, estado);

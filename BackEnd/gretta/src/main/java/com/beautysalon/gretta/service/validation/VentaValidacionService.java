@@ -110,14 +110,18 @@ public class VentaValidacionService {
         // Por ahora solo validamos que existe
     }
 
-    public void validarLimiteComprasDiarias(Integer idCliente) {
+    public void validarLimiteComprasDiarias(Integer idCliente, Integer idVentaExcluir) {
         LocalDateTime inicioDia = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime finDia = LocalDateTime.now().toLocalDate().atTime(23, 59, 59);
 
         List<Venta> ventasHoy = ventaRepository.findByCliente_IdClienteAndFechaVentaBetween(
                 idCliente, inicioDia, finDia);
 
-        if (ventasHoy.size() >= 10) {
+        long cantidadVentas = ventasHoy.stream()
+                .filter(v -> idVentaExcluir == null || !v.getIdVenta().equals(idVentaExcluir))
+                .count();
+
+        if (cantidadVentas >= 10) {
             throw new RuntimeException("El cliente ha alcanzado el límite de compras diarias (10)");
         }
     }
@@ -168,7 +172,7 @@ public class VentaValidacionService {
         }
         
         // Validar límite de compras diarias
-        validarLimiteComprasDiarias(venta.getCliente().getIdCliente());
+        validarLimiteComprasDiarias(venta.getCliente().getIdCliente(), venta.getIdVenta());
         
         // Validar monto máximo
         validarMontoMaximoVenta(venta.getTotal());

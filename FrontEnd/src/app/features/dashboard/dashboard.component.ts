@@ -21,6 +21,7 @@ export class DashboardComponent implements OnInit {
   isEditing: boolean = false;
   selectedItem: any = {};
   modalTitle: string = '';
+  searchTerm: string = '';
 
   // Column definitions for each view
   config: any = {
@@ -37,7 +38,27 @@ export class DashboardComponent implements OnInit {
         { key: 'apellido', label: 'Apellido', type: 'text' },
         { key: 'correo', label: 'Correo', type: 'email' },
         { key: 'telefono', label: 'Teléfono', type: 'text' },
-        { key: 'rol', label: 'Rol', type: 'text' } // Should be select
+        { 
+          key: 'tipoDocumento', 
+          label: 'Tipo Documento', 
+          type: 'select',
+          options: [
+            { value: 'CEDULA', label: 'Cédula' },
+            { value: 'PASAPORTE', label: 'Pasaporte' },
+            { value: 'NIT', label: 'NIT' },
+            { value: 'CEDULA_EXTRANJERIA', label: 'Cédula de Extranjería' }
+          ]
+        },
+        { key: 'numeroDocumento', label: 'No. Documento', type: 'text' },
+        { 
+          key: 'rol', 
+          label: 'Rol', 
+          type: 'select',
+          options: [
+            { value: 'CLIENTE', label: 'Cliente' },
+            { value: 'ESTILISTA', label: 'Estilista' }
+          ]
+        }
       ]
     },
     citas: {
@@ -51,7 +72,17 @@ export class DashboardComponent implements OnInit {
       form: [
         { key: 'fechaCita', label: 'Fecha', type: 'date' },
         { key: 'horaCita', label: 'Hora', type: 'time' },
-        { key: 'estado', label: 'Estado', type: 'text' },
+        { 
+          key: 'estado', 
+          label: 'Estado', 
+          type: 'select',
+          options: [
+            { value: 'PENDIENTE', label: 'Pendiente' },
+            { value: 'CONFIRMADA', label: 'Confirmada' },
+            { value: 'COMPLETADA', label: 'Completada' },
+            { value: 'CANCELADA', label: 'Cancelada' }
+          ]
+        },
         { key: 'observaciones', label: 'Observaciones', type: 'text' },
         { key: 'idCliente', label: 'ID Cliente', type: 'number' },
         { key: 'idEstilista', label: 'ID Estilista', type: 'number' },
@@ -127,6 +158,7 @@ export class DashboardComponent implements OnInit {
 
   setView(view: string) {
     this.currentView = view;
+    this.searchTerm = ''; // Clear search when switching views
     this.loadData();
   }
 
@@ -153,12 +185,14 @@ export class DashboardComponent implements OnInit {
     this.apiService.get<any[]>(endpoint).subscribe({
       next: (response) => {
         this.data = response;
+        this.filterData();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading data', err);
         this.loading = false;
         this.data = [];
+        this.filterData();
       }
     });
   }
@@ -169,6 +203,23 @@ export class DashboardComponent implements OnInit {
 
   getFormFields() {
     return this.config[this.currentView]?.form || [];
+  }
+
+  filteredData: any[] = [];
+
+  filterData() {
+    if (!this.searchTerm) {
+      this.filteredData = [...this.data];
+      return;
+    }
+    const lowerTerm = this.searchTerm.toLowerCase();
+    this.filteredData = this.data.filter(item => {
+      const columns = this.getColumns();
+      return columns.some((col: any) => {
+        const val = item[col.key];
+        return (val !== null && val !== undefined) ? String(val).toLowerCase().includes(lowerTerm) : false;
+      });
+    });
   }
 
 
@@ -183,6 +234,20 @@ export class DashboardComponent implements OnInit {
   editarItem(item: any) {
     this.isEditing = true;
     this.selectedItem = { ...item }; // Clone to avoid direct mutation
+    
+    // Format time for input if needed
+    if (this.currentView === 'citas') {
+      if (this.selectedItem.horaCita) {
+        const time = this.selectedItem.horaCita.toString();
+        if (time.length > 5) {
+          this.selectedItem.horaCita = time.substring(0, 5); // HH:mm
+        }
+      }
+      if (this.selectedItem.fechaCita) {
+        this.selectedItem.fechaCita = this.selectedItem.fechaCita.toString().split('T')[0];
+      }
+    }
+
     this.modalTitle = `Editar ${this.getTitle().split(' ').pop()}`;
     this.showModal = true;
   }
@@ -200,7 +265,11 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error deleting item', err);
-        alert('Error al eliminar el elemento');
+        if (err.error?.detalle?.includes('viola la llave foránea')) {
+          alert('No se puede eliminar este elemento porque está siendo utilizado en otros registros (ej. tiene citas asociadas).');
+        } else {
+          alert('Error al eliminar el elemento: ' + (err.error?.mensaje || 'Intente nuevamente'));
+        }
       }
     });
   }
@@ -208,9 +277,29 @@ export class DashboardComponent implements OnInit {
   guardarItem() {
     const idKey = this.getIdKey();
     
+    // Prepare data for sending
+    const dataToSend = { ...this.selectedItem };
+
+    // Fix time format for Citas (Backend expects HH:mm:ss)
+    if (this.currentView === 'citas') {
+      if (dataToSend.horaCita) {
+        const time = dataToSend.horaCita.toString();
+        if (time.length === 5) { // HH:mm
+          dataToSend.horaCita = time + ':00';
+        }
+      }
+      // Fix date format for Citas (Backend expects LocalDateTime)
+      if (dataToSend.fechaCita) {
+        const date = dataToSend.fechaCita.toString();
+        if (date.length === 10) { // YYYY-MM-DD
+          dataToSend.fechaCita = date + 'T00:00:00';
+        }
+      }
+    }
+
     if (this.isEditing) {
       const id = this.selectedItem[idKey];
-      this.apiService.put(`${this.currentView}/${id}`, this.selectedItem).subscribe({
+      this.apiService.put(`${this.currentView}/${id}`, dataToSend).subscribe({
         next: () => {
           this.closeModal();
           this.loadData();
@@ -218,11 +307,11 @@ export class DashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error updating', err);
-          alert('Error al actualizar');
+          alert('Error al actualizar: ' + (err.error?.mensaje || 'Intente nuevamente'));
         }
       });
     } else {
-      this.apiService.post(this.currentView, this.selectedItem).subscribe({
+      this.apiService.post(this.currentView, dataToSend).subscribe({
         next: () => {
           this.closeModal();
           this.loadData();
@@ -230,7 +319,7 @@ export class DashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error creating', err);
-          alert('Error al crear');
+          alert('Error al crear: ' + (err.error?.mensaje || 'Intente nuevamente'));
         }
       });
     }

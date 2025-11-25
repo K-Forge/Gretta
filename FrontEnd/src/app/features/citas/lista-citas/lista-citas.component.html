@@ -4,25 +4,28 @@
     <p>Gestiona tus próximas visitas a Gretta</p>
   </div>
 
+  <div class="search-container" style="max-width: 1200px; margin: 0 auto 2rem; display: flex; justify-content: flex-end;">
+    <input type="text" placeholder="Buscar citas..." [(ngModel)]="searchTerm" (ngModelChange)="filterCitas()" style="padding: 0.8rem; border-radius: 8px; border: 1px solid #ccc; width: 300px;">
+  </div>
+
   <div class="citas-grid">
-    <!-- Tarjeta de Cita 1 -->
-    <div class="cita-card">
+    <div class="cita-card" *ngFor="let cita of filteredCitas">
       <div class="card-header">
         <div class="date-badge">
-          <span class="day">25</span>
-          <span class="month">Nov</span>
+          <span class="day">{{ cita.fechaCita | date:'dd' }}</span>
+          <span class="month">{{ cita.fechaCita | date:'MMM' }}</span>
         </div>
-        <span class="status-badge confirmada">Confirmada</span>
+        <span class="status-badge" [ngClass]="getEstadoClass(cita.estado)">{{ cita.estado }}</span>
       </div>
       <div class="card-body">
-        <h3>Corte y Peinado</h3>
+        <h3>{{ cita.nombreServicio }}</h3>
         <div class="info-row">
           <i>🕒</i>
-          <span>10:00 AM - 11:30 AM</span>
+          <span>{{ cita.horaCita }}</span>
         </div>
         <div class="info-row">
           <i>👤</i>
-          <span>Estilista: Ana Torres</span>
+          <span>Estilista: {{ cita.nombreEstilista }}</span>
         </div>
         <div class="info-row">
           <i>📍</i>
@@ -30,68 +33,71 @@
         </div>
       </div>
       <div class="card-footer">
-        <button>Ver Detalles</button>
+        <button (click)="openEditModal(cita)">Ver Detalles</button>
       </div>
     </div>
-
-    <!-- Tarjeta de Cita 2 -->
-    <div class="cita-card">
-      <div class="card-header">
-        <div class="date-badge">
-          <span class="day">28</span>
-          <span class="month">Nov</span>
-        </div>
-        <span class="status-badge pendiente">Pendiente</span>
-      </div>
-      <div class="card-body">
-        <h3>Manicure Spa</h3>
-        <div class="info-row">
-          <i>🕒</i>
-          <span>03:00 PM - 04:00 PM</span>
-        </div>
-        <div class="info-row">
-          <i>👤</i>
-          <span>Estilista: Carlos Ruiz</span>
-        </div>
-        <div class="info-row">
-          <i>📍</i>
-          <span>Sede Principal</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <button>Ver Detalles</button>
-      </div>
-    </div>
-
-    <!-- Tarjeta de Cita 3 -->
-    <div class="cita-card">
-      <div class="card-header">
-        <div class="date-badge">
-          <span class="day">05</span>
-          <span class="month">Dic</span>
-        </div>
-        <span class="status-badge cancelada">Cancelada</span>
-      </div>
-      <div class="card-body">
-        <h3>Tratamiento Capilar</h3>
-        <div class="info-row">
-          <i>🕒</i>
-          <span>09:00 AM - 10:30 AM</span>
-        </div>
-        <div class="info-row">
-          <i>👤</i>
-          <span>Estilista: Maria Lopez</span>
-        </div>
-        <div class="info-row">
-          <i>📍</i>
-          <span>Sede Norte</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <button>Ver Detalles</button>
-      </div>
+    
+    <div *ngIf="filteredCitas.length === 0" class="no-citas">
+      <p>No tienes citas programadas.</p>
     </div>
   </div>
 
-  <button class="fab-add" title="Agendar Nueva Cita">+</button>
+  <button class="fab-add" title="Agendar Nueva Cita" (click)="openCreateModal()">+</button>
+
+  <!-- Modal -->
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Detalles de la Cita' : 'Nueva Cita' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="citaForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>Servicio</label>
+            <select formControlName="idServicio">
+              <option *ngFor="let servicio of servicios" [value]="servicio.idServicio">
+                {{ servicio.nombre }} - ${{ servicio.precio }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estilista</label>
+            <select formControlName="idEstilista">
+              <option *ngFor="let estilista of estilistas" [value]="estilista.idEstilista">
+                {{ estilista.usuario.nombre }} {{ estilista.usuario.apellido }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="date" formControlName="fechaCita">
+            </div>
+            <div class="form-group">
+              <label>Hora</label>
+              <input type="time" formControlName="horaCita">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Observaciones</label>
+            <textarea formControlName="observaciones" rows="3"></textarea>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" *ngIf="isEditing" (click)="cancelarCita()">Cancelar Cita</button>
+            <div class="right-actions">
+              <button type="button" class="btn-secondary" (click)="closeModal()">Cerrar</button>
+              <button type="submit" class="btn-primary">
+                {{ isEditing ? 'Guardar Cambios' : 'Agendar Cita' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>

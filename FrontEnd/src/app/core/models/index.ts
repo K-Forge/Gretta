@@ -258,6 +258,8 @@ export interface CambiarContrasenaRequest {
 export interface AuthResponse {
   token: string;
   usuario: Usuario;
+  idCliente?: number;
+  idEstilista?: number;
 }
 
 export interface DashboardStats {
@@ -265,4 +267,21 @@ export interface DashboardStats {
   totalCitas: number;
   totalVentas: number;
   ingresosDelMes: number;
+}
+
+export interface CitaResponse {
+  idCita: number;
+  idCliente: number;
+  nombreCliente: string;
+  idEstilista: number;
+  nombreEstilista: string;
+  idServicio: number;
+  nombreServicio: string;
+  fechaCita: string; // LocalDateTime comes as string
+  horaCita: string;
+  canalReserva: CanalComunicacion;
+  estado: EstadoCita;
+  observaciones: string;
+  fechaCreacion: string;
+  fechaModificacion: string;
 }

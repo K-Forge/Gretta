@@ -74,7 +74,7 @@
             <i class="fas fa-plus"></i> Nuevo
           </button>
           <div class="search-box">
-            <input type="text" placeholder="Buscar...">
+            <input type="text" placeholder="Buscar..." [(ngModel)]="searchTerm" (ngModelChange)="filterData()">
             <i class="fas fa-search"></i>
           </div>
         </div>
@@ -93,12 +93,12 @@
                   <i class="fas fa-spinner fa-spin"></i> Cargando datos...
                 </td>
               </tr>
-              <tr *ngIf="!loading && data.length === 0">
+              <tr *ngIf="!loading && filteredData.length === 0">
                 <td [attr.colspan]="getColumns().length + 1" style="text-align: center; padding: 2rem;">
                   No hay registros disponibles.
                 </td>
               </tr>
-              <tr *ngFor="let item of data">
+              <tr *ngFor="let item of filteredData">
                 <td *ngFor="let col of getColumns()">
                   {{ item[col.key] }}
                 </td>
@@ -126,7 +126,23 @@
         <form (ngSubmit)="guardarItem()">
           <div class="form-group" *ngFor="let field of getFormFields()">
             <label>{{ field.label }}</label>
-            <input [type]="field.type" [(ngModel)]="selectedItem[field.key]" [name]="field.key" class="form-control">
+            
+            <ng-container [ngSwitch]="field.type">
+              <select *ngSwitchCase="'select'" 
+                      [(ngModel)]="selectedItem[field.key]" 
+                      [name]="field.key" 
+                      class="form-control">
+                <option *ngFor="let opt of field.options" [value]="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+              
+              <input *ngSwitchDefault
+                     [type]="field.type" 
+                     [(ngModel)]="selectedItem[field.key]" 
+                     [name]="field.key" 
+                     class="form-control">
+            </ng-container>
           </div>
           
           <div class="modal-footer">
