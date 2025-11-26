@@ -32,4 +32,14 @@ export class ApiService {
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.apiUrl}/${endpoint}`);
   }
+
+  patch<T>(endpoint: string, body: any, params?: any): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        httpParams = httpParams.set(key, params[key]);
+      });
+    }
+    return this.http.patch<T>(`${this.apiUrl}/${endpoint}`, body, { params: httpParams });
+  }
 }

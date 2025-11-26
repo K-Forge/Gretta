@@ -1,119 +1,115 @@
 -- Eliminar la base de datos si existe y crearla nuevamente
 DROP DATABASE IF EXISTS gretta;
 CREATE DATABASE gretta;
-\c gretta;
+
+-- Crear tipos enumerados
+CREATE TYPE rol_usuario AS ENUM ('CLIENTE', 'ESTILISTA');
+CREATE TYPE estado_cita AS ENUM ('PENDIENTE', 'CONFIRMADA', 'COMPLETADA', 'CANCELADA');
+CREATE TYPE canal_comunicacion AS ENUM ('WHATSAPP', 'EMAIL', 'SMS');
+CREATE TYPE estado_notificacion AS ENUM ('PENDIENTE', 'ENVIADA', 'ENTREGADA', 'FALLIDA');
+CREATE TYPE tipo_mensaje AS ENUM ('CLIENTE', 'CHATBOT');
+CREATE TYPE tipo_documento AS ENUM ('CEDULA', 'PASAPORTE', 'NIT', 'CEDULA_EXTRANJERIA');
+CREATE TYPE tipo_notificacion AS ENUM ('RECORDATORIO', 'CONFIRMACION', 'PROMOCION', 'CANCELACION');
 
 -- Crear tabla Usuarios
 CREATE TABLE Usuarios (
     idUsuario SERIAL NOT NULL,
     nombre VARCHAR(40) NOT NULL,
     apellido VARCHAR(40) NOT NULL,
-    correo VARCHAR(20) NULL,
-    telefono BIGINT NOT NULL,
-    contrasena VARCHAR(20) NOT NULL,
-    rol CHAR NULL,
-    canalPreferido VARCHAR(25) NULL,
-    fechaRegistro TIMESTAMP NULL,
+    correo VARCHAR(255) NOT NULL UNIQUE,
+    telefono VARCHAR(20) NOT NULL CHECK (telefono ~ '^[0-9+\-\s()]+$'),
+    contrasena VARCHAR(255) NOT NULL,
+    tipoDocumento tipo_documento NOT NULL,
+    numeroDocumento VARCHAR(50) NOT NULL UNIQUE,
+    rol rol_usuario NOT NULL,
+    canalPreferido canal_comunicacion NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fechaModificacion TIMESTAMP NULL,
+    creadoPor INT NULL,
+    modificadoPor INT NULL,
     PRIMARY KEY (idUsuario)
 );
 
 -- Crear tabla Cliente
 CREATE TABLE Cliente (
-    idCliente INT NOT NULL,
+    idCliente SERIAL NOT NULL,
     idUsuario INT NOT NULL,
-    DocId INT NOT NULL,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (idCliente)
 );
 
 -- Crear tabla Estilista
 CREATE TABLE Estilista (
-    idEstilista INT NOT NULL,
+    idEstilista SERIAL NOT NULL,
     idUsuario INT NOT NULL,
-    Especialidad VARCHAR(100) NULL,
+    especialidad VARCHAR(100) NULL,
     disponibilidad VARCHAR(30) NOT NULL,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (idEstilista)
 );
 
 -- Crear tabla Servicios
 CREATE TABLE Servicios (
-    idServicios INT NOT NULL,
-    nombreServicios VARCHAR(20) NOT NULL,
+    idServicio SERIAL NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
     descripcion TEXT NOT NULL,
     duracion TIME NOT NULL,
-    precio INT NOT NULL,
-    PRIMARY KEY (idServicios)
+    precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (idServicio)
 );
 
 -- Crear tabla Promociones
 CREATE TABLE Promociones (
-    idPromocion INT NOT NULL,
-    idServicios INT NOT NULL,
-    titulo VARCHAR(25) NULL,
-    description TEXT NULL,
-    descuento NUMERIC NULL,
-    servicioAsociado INT NULL,
-    fechaInicio TIMESTAMP NULL,
-    fechaFin TIMESTAMP NULL,
-    PRIMARY KEY (idPromocion)
+    idPromocion SERIAL NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    descripcion TEXT NULL,
+    descuento DECIMAL(5,2) NOT NULL CHECK (descuento >= 0 AND descuento <= 100),
+    fechaInicio TIMESTAMP NOT NULL,
+    fechaFin TIMESTAMP NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (idPromocion),
+    CHECK (fechaFin > fechaInicio)
 );
 
 -- Crear tabla Citas
 CREATE TABLE Citas (
-    idCita INT NOT NULL,
+    idCita SERIAL NOT NULL,
     idCliente INT NOT NULL,
     idEstilista INT NOT NULL,
-    idServicios INT NOT NULL,
+    idServicio INT NOT NULL,
     fechaCita TIMESTAMP NOT NULL,
     horaCita TIME NOT NULL,
-    canalReserva INT NOT NULL,
-    fechaCreacion TIMESTAMP NOT NULL,
-    estado VARCHAR(40) NOT NULL,
-    observaciones VARCHAR(40) NULL,
+    canalReserva canal_comunicacion NOT NULL,
+    fechaCreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fechaModificacion TIMESTAMP NULL,
+    estado estado_cita NOT NULL DEFAULT 'PENDIENTE',
+    observaciones TEXT NULL,
     PRIMARY KEY (idCita)
-);
-
--- Crear tabla AgendaEstilista
-CREATE TABLE AgendaEstilista (
-    idAgenda INT NOT NULL,
-    idEstilista INT NOT NULL,
-    idCita INT NOT NULL,
-    fecha TIMESTAMP NOT NULL,
-    horarioInicio TIME NOT NULL,
-    horaFin TIME NOT NULL,
-    disponibilidad TIMESTAMP NOT NULL,
-    PRIMARY KEY (idAgenda)
 );
 
 -- Crear tabla Notificaciones
 CREATE TABLE Notificaciones (
-    idNotificacion INT NOT NULL,
+    idNotificacion SERIAL NOT NULL,
     idUsuario INT NOT NULL,
     idCita INT NULL,
-    idPromociones INT NULL,
-    tipo VARCHAR(30) NULL,
-    asunto VARCHAR(25) NULL,
-    mensaje TEXT NULL, 
-    fechaEnvio TIMESTAMP NULL,
-    estado VARCHAR(20) NULL,  -- estado de la cita (reservada, confirmada, en curso, etc...)
+    idPromocion INT NULL,
+    tipo tipo_notificacion NOT NULL,
+    asunto VARCHAR(100) NOT NULL,
+    mensaje TEXT NOT NULL,
+    fechaEnvio TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado estado_notificacion NOT NULL DEFAULT 'PENDIENTE',
     PRIMARY KEY (idNotificacion)
-);
-
--- Crear tabla ChatbotWhatsApp
-CREATE TABLE ChatbotWhatsApp (
-    idChat INT NOT NULL,
-    idCita INT NOT NULL,
-    idNotificacion INT NOT NULL,
-    mensajeCliente VARCHAR(40) NOT NULL,
-    respuestaChatbot VARCHAR(40) NOT NULL,
-    fechaMensaje TIMESTAMP NOT NULL,
-    PRIMARY KEY (idChat)
 );
 
 -- Crear tabla HistorialCliente
 CREATE TABLE HistorialCliente (
-    idHistorial INT NOT NULL,
-    idUsuario INT NOT NULL,
-    idServicios INT NOT NULL,
+    idHistorial SERIAL NOT NULL,
+    idCliente INT NOT NULL,
+    idServicio INT NOT NULL,
     fechaServicio TIMESTAMP NOT NULL,
     PRIMARY KEY (idHistorial)
 );
@@ -125,30 +121,19 @@ ADD CONSTRAINT FK_Cliente_Usuario FOREIGN KEY (idUsuario) REFERENCES Usuarios(id
 ALTER TABLE Estilista
 ADD CONSTRAINT FK_Estilista_Usuario FOREIGN KEY (idUsuario) REFERENCES Usuarios(idUsuario);
 
-ALTER TABLE Promociones
-ADD CONSTRAINT FK_Promociones_Servicios FOREIGN KEY (idServicios) REFERENCES Servicios(idServicios);
-
 ALTER TABLE Citas
 ADD CONSTRAINT FK_Citas_Cliente FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
 ADD CONSTRAINT FK_Citas_Estilista FOREIGN KEY (idEstilista) REFERENCES Estilista(idEstilista),
-ADD CONSTRAINT FK_Citas_Servicios FOREIGN KEY (idServicios) REFERENCES Servicios(idServicios);
-
-ALTER TABLE AgendaEstilista
-ADD CONSTRAINT FK_AgendaEstilista_Estilista FOREIGN KEY (idEstilista) REFERENCES Estilista(idEstilista),
-ADD CONSTRAINT FK_AgendaEstilista_Cita FOREIGN KEY (idCita) REFERENCES Citas(idCita);
+ADD CONSTRAINT FK_Citas_Servicio FOREIGN KEY (idServicio) REFERENCES Servicios(idServicio);
 
 ALTER TABLE Notificaciones
 ADD CONSTRAINT FK_Notificaciones_Usuario FOREIGN KEY (idUsuario) REFERENCES Usuarios(idUsuario),
 ADD CONSTRAINT FK_Notificaciones_Cita FOREIGN KEY (idCita) REFERENCES Citas(idCita),
-ADD CONSTRAINT FK_Notificaciones_Promociones FOREIGN KEY (idPromociones) REFERENCES Promociones(idPromocion);
-
-ALTER TABLE ChatbotWhatsApp
-ADD CONSTRAINT FK_Chatbot_Cita FOREIGN KEY (idCita) REFERENCES Citas(idCita),
-ADD CONSTRAINT FK_Chatbot_Notificacion FOREIGN KEY (idNotificacion) REFERENCES Notificaciones(idNotificacion);
+ADD CONSTRAINT FK_Notificaciones_Promocion FOREIGN KEY (idPromocion) REFERENCES Promociones(idPromocion);
 
 ALTER TABLE HistorialCliente
-ADD CONSTRAINT FK_Historial_Usuario FOREIGN KEY (idUsuario) REFERENCES Usuarios(idUsuario),
-ADD CONSTRAINT FK_Historial_Servicios FOREIGN KEY (idServicios) REFERENCES Servicios(idServicios);
+ADD CONSTRAINT FK_Historial_Cliente FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
+ADD CONSTRAINT FK_Historial_Servicio FOREIGN KEY (idServicio) REFERENCES Servicios(idServicio);
 
 -- Nuevas tablas para productos y ventas
 CREATE TABLE Productos (
@@ -182,21 +167,6 @@ CREATE TABLE DetalleVenta (
 );
 
 -- ========================================
--- NUEVAS TABLAS PARA AJUSTE AL TALLER 4
--- ========================================
-
--- Catálogo de tipos de notificación
-CREATE TABLE TipoNotificacion (
-    idTipoNotificacion SERIAL PRIMARY KEY,
-    nombre VARCHAR(30) NOT NULL
-);
-
-ALTER TABLE Notificaciones
-ADD COLUMN idTipoNotificacion INT NULL,
-ADD CONSTRAINT FK_Notificaciones_Tipo
-    FOREIGN KEY (idTipoNotificacion) REFERENCES TipoNotificacion(idTipoNotificacion);
-
--- ========================================
 -- Reestructurar Chatbot en Conversación y Mensajes
 -- ========================================
 CREATE TABLE ChatConversacion (
@@ -209,17 +179,17 @@ CREATE TABLE ChatConversacion (
 CREATE TABLE ChatMensaje (
     idMensaje SERIAL PRIMARY KEY,
     idConversacion INT NOT NULL,
-    tipoMensaje VARCHAR(10) NOT NULL CHECK (tipoMensaje IN ('Cliente', 'Chatbot')),
+    tipoMensaje tipo_mensaje NOT NULL,
     contenido TEXT NOT NULL,
     fechaMensaje TIMESTAMP NOT NULL,
     FOREIGN KEY (idConversacion) REFERENCES ChatConversacion(idConversacion)
 );
 
 -- ========================================
--- Portafolio del estilista (visitas o trabajos vistos)
+-- Historial del estilista (visitas o trabajos vistos)
 -- ========================================
-CREATE TABLE PortafolioEstilista (
-    idPortafolio SERIAL PRIMARY KEY,
+CREATE TABLE HistorialEstilista (
+    idHistorial SERIAL PRIMARY KEY,
     idEstilista INT NOT NULL,
     idCliente INT NOT NULL,
     fechaVisita TIMESTAMP NOT NULL,
@@ -235,5 +205,5 @@ CREATE TABLE PromocionServicios (
     idPromocion INT NOT NULL,
     idServicio INT NOT NULL,
     FOREIGN KEY (idPromocion) REFERENCES Promociones(idPromocion),
-    FOREIGN KEY (idServicio) REFERENCES Servicios(idServicios)
+    FOREIGN KEY (idServicio) REFERENCES Servicios(idServicio)
 );
